@@ -11,4 +11,9 @@ public class AppConfig {
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
+
+    @Bean
+    public ConfigValues configValues() {
+        return new ConfigValues();
+    }
 }
