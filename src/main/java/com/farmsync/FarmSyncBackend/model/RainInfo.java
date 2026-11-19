@@ -7,9 +7,5 @@ public record RainInfo(
         boolean isRaining,
         String condition,
         double rainMm,
-        List<DailyRain> forecast,
         WeatherResponse.Current current) {
-
-    public record DailyRain(String date, double rainMm, int probabilityPercent) {
-    }
 }

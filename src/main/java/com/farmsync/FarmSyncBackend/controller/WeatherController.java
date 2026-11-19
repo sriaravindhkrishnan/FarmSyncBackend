@@ -1,6 +1,7 @@
 package com.farmsync.FarmSyncBackend.controller;
 
 import com.farmsync.FarmSyncBackend.model.RainInfo;
+import com.farmsync.FarmSyncBackend.model.WeatherAPIRegularResponse;
 import com.farmsync.FarmSyncBackend.model.WeatherCheck;
 import com.farmsync.FarmSyncBackend.service.WeatherService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,7 @@ public class WeatherController {
     private WeatherService weatherService;
 
     @PostMapping
-    public RainInfo wetherCheckByLocation(@RequestBody WeatherCheck wetherCheck) {
-        return weatherService.getRainInfo(wetherCheck);
+    public WeatherAPIRegularResponse wetherCheckByLocation(@RequestBody WeatherCheck wetherCheck) {
+        return weatherService.getWeatherRegularInfo(wetherCheck);
     }
 }
