@@ -166,10 +166,13 @@ public class WeatherService {
             RainInfo rainInfo =  new RainInfo(
                     w.latitude(),
                     w.longitude(),
-                    w.current().rain() > 0 || isRainCode(code),
+//                    w.current().rain() > 0 || isRainCode(code),
+                    true,
                     describe(code),
                     w.current().rain(),
                     w.current());
+
+//            dummy
 
             System.out.println("[RAIN-CONFIRMED] RainInfo: " + rainInfo);
             rainAlertService.broadcast(rainInfo);

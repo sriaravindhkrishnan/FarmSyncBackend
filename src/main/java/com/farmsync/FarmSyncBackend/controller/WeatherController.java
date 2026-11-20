@@ -5,10 +5,7 @@ import com.farmsync.FarmSyncBackend.model.WeatherAPIRegularResponse;
 import com.farmsync.FarmSyncBackend.model.WeatherCheck;
 import com.farmsync.FarmSyncBackend.service.WeatherService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/wether")
@@ -20,5 +17,10 @@ public class WeatherController {
     @PostMapping
     public WeatherAPIRegularResponse wetherCheckByLocation(@RequestBody WeatherCheck wetherCheck) {
         return weatherService.getWeatherRegularInfo(wetherCheck);
+    }
+
+    @GetMapping("/health")
+    public String health() {
+        return "I am healthy";
     }
 }
