@@ -2,10 +2,7 @@ package com.farmsync.FarmSyncBackend.service;
 
 
 import com.farmsync.FarmSyncBackend.config.ConfigValues;
-import com.farmsync.FarmSyncBackend.model.RainInfo;
-import com.farmsync.FarmSyncBackend.model.WeatherAPIRegularResponse;
-import com.farmsync.FarmSyncBackend.model.WeatherCheck;
-import com.farmsync.FarmSyncBackend.model.WeatherResponse;
+import com.farmsync.FarmSyncBackend.model.*;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.TaskScheduler;
@@ -40,12 +37,12 @@ public class WeatherService {
         this.rainAlertService = rainAlertService;
     }
 
-    private WeatherAPIRegularResponse getWeatherRegular(WeatherCheck wetherCheck) {
+    private WeatherAPIRegularResponse getWeatherRegular(FarmDetails farmDetails) {
         return restClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/v1/forecast")
-                        .queryParam("latitude", wetherCheck.getLatitude())
-                        .queryParam("longitude", wetherCheck.getLongitude())
+                        .queryParam("latitude", farmDetails.latitude())
+                        .queryParam("longitude", farmDetails.longitude())
                         .queryParam("hourly", configValues.getWeatherRegularFields())
                         .queryParam("forecast_hours", configValues.getWeatherRegularForecaster())
                         .queryParam("timezone", configValues.getWeatherTimezone())
@@ -54,11 +51,12 @@ public class WeatherService {
                 .body(WeatherAPIRegularResponse.class);
     }
 
-    public WeatherAPIRegularResponse getWeatherRegularInfo(WeatherCheck wetherCheck) {
-        WeatherAPIRegularResponse weatherAPIRegularResponseInfo = getWeatherRegular(wetherCheck);
-        processRegularWeatherInfo(weatherAPIRegularResponseInfo, wetherCheck);
+    public WeatherAPIRegularResponse getWeatherRegularInfo(FarmDetails farmDetails) {
+        WeatherAPIRegularResponse weatherAPIRegularResponseInfo = getWeatherRegular(farmDetails);
+        processRegularWeatherInfo(weatherAPIRegularResponseInfo, farmDetails);
         return weatherAPIRegularResponseInfo;
     }
+
     private void cancelPendingChecks() {
         for (ScheduledFuture<?> future : pendingChecks) {
             if (!future.isDone()) {
@@ -69,7 +67,7 @@ public class WeatherService {
     }
 
 
-    private void processRegularWeatherInfo(WeatherAPIRegularResponse weatherAPIRegularResponseInfo, WeatherCheck wetherCheck) {
+    private void processRegularWeatherInfo(WeatherAPIRegularResponse weatherAPIRegularResponseInfo, FarmDetails farmDetails) {
         cancelPendingChecks();
         List<LocalDateTime> slots = new ArrayList<>();
         ZoneId zone = ZoneId.of(configValues.getWeatherTimezone());
@@ -90,41 +88,32 @@ public class WeatherService {
                     }
                     LocalDateTime slotTime = LocalDateTime.parse(times.get(i)).plusMinutes(configValues.getWeatherDefaultPlusInMinute());
                     ZonedDateTime slotZoned = slotTime.atZone(zone);
-                    boolean isHighConfidenceRain = prob > configValues.getWeatherProbabilityThreshold(); // > 80
+                    boolean isHighConfidenceRain = prob >= configValues.getWeatherProbabilityThreshold(); // > 80
                     boolean isHeavyShowerOverride = prob >= configValues.getWeatherProbabilityMinimumToRain() && precp >= configValues.getWeatherMinimumPrecipitation();
 
                     if ((isHighConfidenceRain || isHeavyShowerOverride) && slotZoned.isAfter(now)) {
                         slots.add(slotTime);
-                        ScheduledFuture<?> future = updateSlotToScheduler(slotTime, slotZoned, wetherCheck);
+                        ScheduledFuture<?> future = updateSlotToScheduler(slotTime, slotZoned, farmDetails);
                         pendingChecks.add(future);
                     }
 //                    else if(i == 0){
-//                        getDummySlotToTest(now, wetherCheck, slots);
+//                        getDummySlotToTest(now, farmDetails, slots);
 //                    }
                 }
             }
         }
-
-
         scheduledSlots = Collections.unmodifiableList(slots);
         System.out.println("[RAIN-SCHEDULE] Scheduled slots at " + now + ": " + scheduledSlots);
-
-//        return Map.of(
-//                "scheduledAt", now.toString(),
-//                "threshold", configValues.getWeatherProbabilityThreshold(),
-//                "scheduledSlots", scheduledSlots.stream().map(LocalDateTime::toString).toList()
-//        );
-
     }
 
-    private ScheduledFuture<?> updateSlotToScheduler(LocalDateTime slotTime, ZonedDateTime slotZoned, WeatherCheck wetherCheck) {
+    private ScheduledFuture<?> updateSlotToScheduler(LocalDateTime slotTime, ZonedDateTime slotZoned, FarmDetails farmDetails) {
         return taskScheduler.schedule(
-                () -> onSlotTriggered(slotTime, wetherCheck),
+                () -> onSlotTriggered(slotTime, farmDetails),
                 slotZoned.toInstant()
         );
     }
 
-    private void getDummySlotToTest(ZonedDateTime now, WeatherCheck wetherCheck, List<LocalDateTime> slots) {
+    private void getDummySlotToTest(ZonedDateTime now, FarmDetails farmDetails, List<LocalDateTime> slots) {
         ZoneId zone = ZoneId.of(configValues.getWeatherTimezone());
         System.out.println(now);
         String formatted = now
@@ -132,25 +121,25 @@ public class WeatherService {
         System.out.println(formatted);
         LocalDateTime slotTime = LocalDateTime.parse(formatted.toString()).plusMinutes(1);
         ZonedDateTime slotZoned = slotTime.atZone(zone);
-        ScheduledFuture<?> future = updateSlotToScheduler(slotTime, slotZoned, wetherCheck);
+        ScheduledFuture<?> future = updateSlotToScheduler(slotTime, slotZoned, farmDetails);
         System.out.println(future);
         pendingChecks.add(future);
         System.out.println(pendingChecks);
         slots.add(slotTime);
     }
 
-    private void onSlotTriggered(LocalDateTime slotTime, WeatherCheck wetherCheck) {
+    private void onSlotTriggered(LocalDateTime slotTime, FarmDetails farmDetails) {
         System.out.println("[RAIN-DYANAMIC-SCHEDULE] Triggered slot: " + slotTime);
-        getRainInfo(wetherCheck, slotTime);
+        getRainInfo(farmDetails, slotTime);
     }
 
 
-    public WeatherResponse getCurrentWeather(WeatherCheck wetherCheck) {
+    public WeatherResponse getCurrentWeather(FarmDetails farmDetails) {
         return restClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/v1/forecast")
-                        .queryParam("latitude", wetherCheck.getLatitude())
-                        .queryParam("longitude", wetherCheck.getLongitude())
+                        .queryParam("latitude", farmDetails.latitude())
+                        .queryParam("longitude", farmDetails.longitude())
                         .queryParam("current", configValues.getWeatherCurrentFields())
                         .queryParam("timezone", configValues.getWeatherTimezone())
                         .build())
@@ -158,23 +147,20 @@ public class WeatherService {
                 .body(WeatherResponse.class);
     }
 //
-    public void getRainInfo(WeatherCheck wetherCheck, LocalDateTime slotTime) {
-        WeatherResponse w = getCurrentWeather(wetherCheck);
+    public void getRainInfo(FarmDetails farmDetails, LocalDateTime slotTime) {
+        WeatherResponse w = getCurrentWeather(farmDetails);
         int code = w.current().weatherCode();
         boolean isHeavyRain = w.current().isHeavyRain();
-//        boolean isHeavyRain = w.current().isHeavyRain(true);
         if(isHeavyRain){
             RainInfo rainInfo =  new RainInfo(
                     w.latitude(),
                     w.longitude(),
                     w.current().rain() > 0 || isRainCode(code),
-//                    true,
                     describe(code),
                     w.current().rain(),
+                    farmDetails.farmName(),
+                    farmDetails.farmId(),
                     w.current());
-
-//            dummy
-
             System.out.println("[RAIN-CONFIRMED] RainInfo: " + rainInfo);
             rainAlertService.broadcast(rainInfo);
             scheduledSlots = new ArrayList<>();

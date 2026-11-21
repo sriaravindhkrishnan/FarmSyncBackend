@@ -36,7 +36,8 @@ public record WeatherResponse(
 
             // 2. Check WMO weather codes for heavy rain/showers or thunderstorms
             // 65: Heavy rain, 82: Violent rain showers, 95/96/99: Thunderstorm
-            boolean severeWeatherCode = weatherCode == 65 || weatherCode == 82 || weatherCode >= 95;
+            boolean severeWeatherCode = (weatherCode >= 51 && weatherCode <= 67) || (weatherCode >= 80 && weatherCode <= 82) || (weatherCode >= 95);
+
 
             return heavyIntensity || severeWeatherCode;
         }

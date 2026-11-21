@@ -7,5 +7,7 @@ public record RainInfo(
         boolean isRaining,
         String condition,
         double rainMm,
+        String formName,
+        String formId,
         WeatherResponse.Current current) {
 }

@@ -1,0 +1,23 @@
+INSERT INTO
+    `project-d344ccfa-338f-43e6-80f.farmsync.rain_forecast_slots`
+(
+    slot_id,
+    farm_id,
+    forecast_date,
+    slot_time,
+    rain_probability,
+    status,
+    created_at,
+    updated_at
+)
+VALUES
+    (
+        @slotId,
+        @farmId,
+        DATE(@forecastDate),
+        TIMESTAMP(@slotTime),
+        @rainProbability,
+        @status,
+        TIMESTAMP(@createdAt),
+        TIMESTAMP(@updatedAt)
+    );

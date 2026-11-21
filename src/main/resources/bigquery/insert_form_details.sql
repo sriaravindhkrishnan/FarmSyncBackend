@@ -1,0 +1,25 @@
+INSERT INTO
+    `project-d344ccfa-338f-43e6-80f.farmsync.farms`
+(
+    farm_id,
+    user_id,
+    farm_name,
+    crop_type,
+    latitude,
+    longitude,
+    is_active,
+    created_at,
+    updated_at
+)
+VALUES
+    (
+        @farmId,
+        @userId,
+        @farmName,
+        @cropType,
+        @latitude,
+        @longitude,
+        @isActive,
+        @createdAt,
+        @updatedAt
+    );

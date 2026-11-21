@@ -20,4 +20,5 @@ public class ConfigValues {
     private int weatherProbabilityMinimumToRain;
     private int weatherDefaultPlusInMinute;
     private String weatherCurrentFields;
+    private String globalUserId;
 }
