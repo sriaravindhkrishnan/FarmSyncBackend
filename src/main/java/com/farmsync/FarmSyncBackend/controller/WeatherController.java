@@ -21,6 +21,6 @@ public class WeatherController {
 
     @GetMapping("/health")
     public String health() {
-        return "I am healthy";
+        return "I am healthy and updated the real time rain monitor";
     }
 }
