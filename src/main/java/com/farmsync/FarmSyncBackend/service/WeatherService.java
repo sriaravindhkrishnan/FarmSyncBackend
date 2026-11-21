@@ -97,9 +97,10 @@ public class WeatherService {
                         slots.add(slotTime);
                         ScheduledFuture<?> future = updateSlotToScheduler(slotTime, slotZoned, wetherCheck);
                         pendingChecks.add(future);
-                    } else if(i == 0){
-                        getDummySlotToTest(now, wetherCheck, slots);
                     }
+//                    else if(i == 0){
+//                        getDummySlotToTest(now, wetherCheck, slots);
+//                    }
                 }
             }
         }
@@ -160,14 +161,14 @@ public class WeatherService {
     public void getRainInfo(WeatherCheck wetherCheck, LocalDateTime slotTime) {
         WeatherResponse w = getCurrentWeather(wetherCheck);
         int code = w.current().weatherCode();
-//        boolean isHeavyRain = w.current().isHeavyRain();
-        boolean isHeavyRain = w.current().isHeavyRain(true);
+        boolean isHeavyRain = w.current().isHeavyRain();
+//        boolean isHeavyRain = w.current().isHeavyRain(true);
         if(isHeavyRain){
             RainInfo rainInfo =  new RainInfo(
                     w.latitude(),
                     w.longitude(),
-//                    w.current().rain() > 0 || isRainCode(code),
-                    true,
+                    w.current().rain() > 0 || isRainCode(code),
+//                    true,
                     describe(code),
                     w.current().rain(),
                     w.current());
