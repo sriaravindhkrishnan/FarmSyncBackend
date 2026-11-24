@@ -1,16 +1,16 @@
 package com.farmsync.FarmSyncBackend.model;
 
-import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public record RainForecastSlot(
         String slotId,
         String farmId,
         LocalDate forecastDate,
-        Instant slotTime,
+        LocalDateTime slotTime,
         Double rainProbability,
         String status,
-        Instant createdAt,
-        Instant updatedAt
+        String createdAt,
+        String updatedAt
 ) {
 }

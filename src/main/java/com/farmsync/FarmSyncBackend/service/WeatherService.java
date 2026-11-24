@@ -24,16 +24,16 @@ public class WeatherService {
 
     private final RestClient restClient;
     private final ConfigValues configValues;
-    private final TaskScheduler taskScheduler;
+//    private final TaskScheduler taskScheduler;
     private final RainAlertService rainAlertService;
 
     private List<LocalDateTime> scheduledSlots = List.of();
     private final List<ScheduledFuture<?>> pendingChecks = new ArrayList<>();
 
-    public WeatherService(ConfigValues configValues, TaskScheduler taskScheduler,  RainAlertService rainAlertService) {
+    public WeatherService(ConfigValues configValues,  RainAlertService rainAlertService) {
         this.configValues = configValues;
         this.restClient = RestClient.builder().baseUrl(configValues.getWeatherApiBaseUrl()).build();
-        this.taskScheduler = taskScheduler;
+//        this.taskScheduler = taskScheduler;
         this.rainAlertService = rainAlertService;
     }
 
@@ -93,8 +93,8 @@ public class WeatherService {
 
                     if ((isHighConfidenceRain || isHeavyShowerOverride) && slotZoned.isAfter(now)) {
                         slots.add(slotTime);
-                        ScheduledFuture<?> future = updateSlotToScheduler(slotTime, slotZoned, farmDetails);
-                        pendingChecks.add(future);
+//                        ScheduledFuture<?> future = updateSlotToScheduler(slotTime, slotZoned, farmDetails);
+//                        pendingChecks.add(future);
                     }
 //                    else if(i == 0){
 //                        getDummySlotToTest(now, farmDetails, slots);
@@ -106,12 +106,12 @@ public class WeatherService {
         System.out.println("[RAIN-SCHEDULE] Scheduled slots at " + now + ": " + scheduledSlots);
     }
 
-    private ScheduledFuture<?> updateSlotToScheduler(LocalDateTime slotTime, ZonedDateTime slotZoned, FarmDetails farmDetails) {
-        return taskScheduler.schedule(
-                () -> onSlotTriggered(slotTime, farmDetails),
-                slotZoned.toInstant()
-        );
-    }
+//    private ScheduledFuture<?> updateSlotToScheduler(LocalDateTime slotTime, ZonedDateTime slotZoned, FarmDetails farmDetails) {
+//        return taskScheduler.schedule(
+//                () -> onSlotTriggered(slotTime, farmDetails),
+//                slotZoned.toInstant()
+//        );
+//    }
 
     private void getDummySlotToTest(ZonedDateTime now, FarmDetails farmDetails, List<LocalDateTime> slots) {
         ZoneId zone = ZoneId.of(configValues.getWeatherTimezone());
@@ -121,10 +121,10 @@ public class WeatherService {
         System.out.println(formatted);
         LocalDateTime slotTime = LocalDateTime.parse(formatted.toString()).plusMinutes(1);
         ZonedDateTime slotZoned = slotTime.atZone(zone);
-        ScheduledFuture<?> future = updateSlotToScheduler(slotTime, slotZoned, farmDetails);
-        System.out.println(future);
-        pendingChecks.add(future);
-        System.out.println(pendingChecks);
+//        ScheduledFuture<?> future = updateSlotToScheduler(slotTime, slotZoned, farmDetails);
+//        System.out.println(future);
+//        pendingChecks.add(future);
+//        System.out.println(pendingChecks);
         slots.add(slotTime);
     }
 
